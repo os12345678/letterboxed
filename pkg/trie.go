@@ -1,45 +1,55 @@
 package trie
 
 type TrieNode struct {
-	children map[rune]*TrieNode
-	isWord bool
+	Value    rune
+	Parent   *TrieNode
+	Children map[rune]*TrieNode
+	IsWord   bool
 }
 
-func newTrieNode() *TrieNode {
+func NewTrieNode(value rune, parent *TrieNode) *TrieNode {
 	return &TrieNode{
-		children: make(map[rune]*TrieNode),
-		isWord: false,
+		Value:    value,
+		Parent:   parent,
+		Children: make(map[rune]*TrieNode),
+		IsWord:   false,
 	}
 }
 
 type Trie struct {
-	root *TrieNode
+	Root *TrieNode
 }
 
-func newTrie() *Trie {
+func NewTrie() *Trie {
 	return &Trie{
-		root: newTrieNode(),
+		Root: NewTrieNode(0, nil),
 	}
 }
 
-func (t *Trie) insert(word string) {
-    node := t.root
-    for _, char := range word {
-        if _, exists := node.children[char]; !exists {
-            node.children[char] = newTrieNode()
-        }
-        node = node.children[char]
-    }
-    node.isWord = true
+func (t *Trie) Insert(word string) {
+	node := t.Root
+	for _, char := range word {
+		if _, exists := node.Children[char]; !exists {
+			node.Children[char] = NewTrieNode(char, node)
+		}
+		node = node.Children[char]
+	}
+	node.IsWord = true
+}
+func (t *Trie) Search(word string) bool {
+	node := t.Root
+	for _, char := range word {
+		if _, exists := node.Children[char]; !exists {
+			return false
+		}
+		node = node.Children[char]
+	}
+	return node.IsWord
 }
 
-func (t *Trie) search(word string) bool {
-    node := t.root
-    for _, char := range word {
-        if _, exists := node.children[char]; !exists {
-            return false
-        }
-        node = node.children[char]
-    }
-    return node.isWord
+func (n *TrieNode) GetWord() string {
+	if n.Parent != nil {
+		return n.Parent.GetWord() + string(n.Value)
+	}
+	return ""
 }
