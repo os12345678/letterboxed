@@ -1,5 +1,12 @@
 package trie
 
+/*
+TrieNode
+  ├── Value: 'a'
+  ├── Parent: *TrieNode
+  ├── Children: map[rune]*TrieNode
+  └── IsTerminal: false
+*/
 type TrieNode struct {
 	Value    rune
 	Parent   *TrieNode
@@ -16,6 +23,13 @@ func NewTrieNode(value rune, parent *TrieNode) *TrieNode {
 	}
 }
 
+/*
+Trie
+  ├── Root: TrieNode
+        ├── Value: 0 (null character)
+        ├── Children: map[rune]*TrieNode
+        └── IsTerminal: false
+*/
 type Trie struct {
 	Root *TrieNode
 }
