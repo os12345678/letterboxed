@@ -91,18 +91,23 @@ getAllWords
   └── Collect words from trie
 */
 func (lb *LetterBox) getAllWords() []string {
-	start := time.Now()
+    start := time.Now()
 	defer func() {
-		fmt.Printf("getAllWords took %v\n", time.Since(start))
+		fmt.Printf("getPuzzleWords took %v\n", time.Since(start))
 	}()
 
-	var words []string
+	var allValidNodes []*trie.TrieNode
 	for side := range lb.sides {
 		for _, letter := range side {
-			if node := lb.trie.Root.Children[letter]; node != nil {
-				words = append(words, lb.collectWords(node, string(letter))...)
+			if lb.trie.Root.Children[letter] != nil {
+				allValidNodes = append(allValidNodes, lb.getInnerWords(lb.trie.Root.Children[letter], side)...)
 			}
 		}
+	}
+
+	var words []string
+	for _, node := range allValidNodes {
+		words = append(words, node.GetWord())
 	}
 	return words
 }
@@ -113,15 +118,23 @@ collectWords
   ├── Collect current word
   └── Recursively collect words from children
 */
-func (lb *LetterBox) collectWords(node *trie.TrieNode, prefix string) []string {
-	var words []string
+func (lb *LetterBox) getInnerWords(node *trie.TrieNode, lastSide string) []*trie.TrieNode {
+	var validNodes []*trie.TrieNode
 	if node.IsWord {
-		words = append(words, prefix)
+		validNodes = append(validNodes, node)
 	}
-	for char, child := range node.Children {
-		words = append(words, lb.collectWords(child, prefix+string(char))...)
+	if node.Children != nil {
+		for nextSide := range lb.sides {
+			if nextSide != lastSide {
+				for _, nextLetter := range nextSide {
+					if node.Children[nextLetter] != nil {
+						validNodes = append(validNodes, lb.getInnerWords(node.Children[nextLetter], nextSide)...)
+					}
+				}
+			}
+		}
 	}
-	return words
+	return validNodes
 }
 
 /*
