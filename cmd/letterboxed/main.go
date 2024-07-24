@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/karan/vocabulary"
 	trie "github.com/os12345678/letterboxed/pkg"
@@ -42,10 +41,10 @@ NewLetterBox
   └── Build puzzle graph
 */
 func NewLetterBoxed(inputString, dictionary string, lenThreshold int) *LetterBox {
-    start := time.Now()
-	defer func() {
-		fmt.Printf("LetterBoxed initialization took %v\n", time.Since(start))
-	}()
+    // start := time.Now()
+	// defer func() {
+	// 	fmt.Printf("LetterBoxed initialization took %v\n", time.Since(start))
+	// }()
 
     lb := &LetterBox{
 		inputString:  strings.ToLower(inputString),
@@ -91,10 +90,10 @@ getAllWords
   └── Collect words from trie
 */
 func (lb *LetterBox) getAllWords() []string {
-    start := time.Now()
-	defer func() {
-		fmt.Printf("getPuzzleWords took %v\n", time.Since(start))
-	}()
+    // start := time.Now()
+	// defer func() {
+	// 	fmt.Printf("getPuzzleWords took %v\n", time.Since(start))
+	// }()
 
 	var allValidNodes []*trie.TrieNode
 	for side := range lb.sides {
@@ -182,10 +181,10 @@ findAllSolutions
   └── Find solutions for each combination
 */
 func (lb *LetterBox) findAllSolutions() [][]string {
-	start := time.Now()
-	defer func() {
-		fmt.Printf("findAllSolutions took %v\n", time.Since(start))
-	}()
+	// start := time.Now()
+	// defer func() {
+	// 	fmt.Printf("findAllSolutions took %v\n", time.Since(start))
+	// }()
 
 	var allSolutions [][]string
 	for firstLetter := range lb.letters {
@@ -244,13 +243,23 @@ func main() {
 	dict := flag.String("dict", "words.txt", "path to newline-delimited text file of valid words")
 	lenThreshold := flag.Int("len", 3, "maximum length, in words, of solutions")
     hint := flag.Bool("hint", false, "print hint")
+	ans := flag.Bool("ans", false, "print answer")
 	flag.Parse()
 
 	fmt.Println("solving puzzle", *puzzle)
 	p := NewLetterBoxed(*puzzle, *dict, *lenThreshold)
-	fmt.Println(len(p.words), "valid words found")
 	metaSolutions := p.findAllSolutions()
-    if *hint {
+	count := 0
+	for range metaSolutions {
+		count += 1
+	}
+	if count == 1{
+		fmt.Println("found", count, "solution")
+	} else {
+		fmt.Println("found", count, "solutions")
+	}
+    
+	if *hint {
         c := &vocabulary.Config{BigHugeLabsApiKey: os.Getenv("BigHugeLabsApiKey"), WordnikApiKey: os.Getenv("WordnikApiKey")}
         v, err := vocabulary.New(c)
         if err != nil {
@@ -264,10 +273,10 @@ func main() {
         fmt.Printf("word.Meanings = %s \n", word.Meanings)
         fmt.Printf("word.Synonyms = %s \n", word.Synonyms)
         fmt.Printf("word.UsageExample = %s \n", word.UsageExample)
-	} else {
-        for _, solution := range metaSolutions {
-            fmt.Println(solution)
-        }
-    }
+	} else if *ans {
+		for _, solution := range metaSolutions {
+			fmt.Println(solution)
+		}
+	}
 }
 
